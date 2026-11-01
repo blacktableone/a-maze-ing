@@ -1,0 +1,11 @@
+# .gitignore
+__pycache__/
+*.pyc
+.mypy_cache/
+.pytest_cache/
+.venv/
+venv/
+build/
+dist/
+*.egg-info/
+maze.txt
