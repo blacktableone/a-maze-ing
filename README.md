@@ -226,13 +226,17 @@ flake8 and mypy. We also checked our output files with the provided
 
 ## Resources
 
-- Python documentation: `random`, `collections.deque`, `pathlib`, `argparse`, `pdb`
-
 - [Maze Generation: Recursive Backtracking](https://weblog.jamisbuck.org/2010/12/27/maze-generation-recursive-backtracking?utm_source=chatgpt.com)
+- [Maze Algorithms — Interactive Demos](https://www.jamisbuck.org/mazes/?utm_source=chatgpt.com)
+- [ Python Bitwise AND and OR Operators](https://www.boot.dev/blog/python/python-bitwise-operators?utm_source=chatgpt.com)
+- [python built-in functions](https://docs.python.org/3/builtins/functions.html)for `format()`、`int()`  `hex()`。
+- [Maze Solving - Computerphile](https://www.youtube.com/watch?v=rop0W4QDOUI)
+- [Breadth First Search Algorithm | Shortest Path | Graph Theory](https://www.youtube.com/watch?v=oDqjPvD54Ss)
+- [Python argparse Tutorial](https://docs.python.org/3/howto/argparse.html?utm_source=chatgpt.com)：learn how to read command-line arguments。
+- [Python pathlib](https://docs.python.org/3/library/pathlib.html?utm_source=chatgpt.com)：
+- [Python Errors and Exceptions](https://docs.python.org/3/tutorial/errors.html?utm_source=chatgpt.com)：review `try`、`except`
 
-- [Maze Algorithms](https://www.jamisbuck.org/mazes/?utm_source=chatgpt.com)
-
-- [Maze Generation Algorithm on Python](https://www.youtube.com/watch?v=jZQ31-4_8KM)
+# creat
 
 
 ### How AI was used
