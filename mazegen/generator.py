@@ -27,8 +27,8 @@ class MazeGenerator:
     """Generate a maze, its '42' pattern and its shortest solution.
 
     Args:
-        width: number of columns (>= 2).
-        height: number of rows (>= 2).
+        width: number of columns (between 2 and 42).
+        height: number of rows (between 2 and 42).
         entry: (x, y) of the entry cell.
         exit_: (x, y) of the exit cell (default: bottom-right).
         perfect: True for a perfect maze, False for a playable board.
@@ -44,10 +44,20 @@ class MazeGenerator:
     def __init__(self, width: int, height: int,
                  entry: Point = (0, 0), exit_: Point | None = None,
                  perfect: bool = True, seed: int | None = None) -> None:
+        """Initialize the maze generator.
+
+        Args:
+            width: Number of columns.
+            height: Number of rows.
+            entry: Starting position (x, y).
+            exit_: Destination position (x, y).
+            perfect: Whether to generate a perfect maze.
+            seed: Random seed for reproducible generation.
+        """
         if exit_ is None:
             exit_ = (width - 1, height - 1)
-        if width < 2 or height < 2:
-            raise ValueError("width and height must be at least 2")
+        if not (2 <= width <= 42 and 2 <= height <= 42):
+            raise ValueError("width and height must be between 2 and 42")
         self.width = width
         self.height = height
         self.entry = entry
@@ -78,18 +88,31 @@ class MazeGenerator:
         self.solution = self._solve()
 
     def hex_rows(self) -> list[str]:
-        """Return one hexadecimal string per row (output file format)."""
+        """Convert maze cells into hexadecimal strings.
+
+        Returns:
+            A list of hexadecimal strings, one for each row.
+        """
         return ["".join(f"{c:X}" for c in row) for row in self.cells]
 
     def dead_ends(self) -> list[Point]:
-        """Return the cells that have exactly one opening."""
+        """Find all cells that have exactly one open passage.
+
+        Returns:
+            A list of (x, y) coordinates of dead-end cells.
+        """
         return [(x, y) for y in range(self.height)
                 for x in range(self.width)
                 if (x, y) not in self.pattern_cells
                 and bin(self.cells[y][x]).count("1") == 3]
 
     def loop_count(self) -> int:
-        """Number of independent loops: edges - nodes + 1."""
+        """Count the independent loops in the maze.
+
+        Returns:
+            The number of independent loops, calculated as
+            edges - nodes + 1.
+        """
         nodes = self.width * self.height - len(self.pattern_cells)
         edges = 0
         for y in range(self.height):
@@ -102,28 +125,59 @@ class MazeGenerator:
         return edges - nodes + 1
 
     def has_open_area(self) -> bool:
-        """True if some 3x3 block is completely open (forbidden)."""
+        """Check whether the maze contains a completely open 3x3 area.
+
+        Returns:
+            True if an open 3x3 area exists, otherwise False.
+        """
         return any(self._open_block(bx, by)
                    for by in range(self.height - 2)
                    for bx in range(self.width - 2))
 
     # ---------- helpers ----------
     def _inside(self, x: int, y: int) -> bool:
+        """Check whether a coordinate is inside the maze.
+
+        Args:
+            x: Horizontal coordinate.
+            y: Vertical coordinate.
+
+        Returns:
+            True if the coordinate is inside the maze, otherwise False.
+        """
         return 0 <= x < self.width and 0 <= y < self.height
 
     def _open(self, x: int, y: int, move: Move) -> None:
-        """Remove the wall between (x, y) and its neighbour, both sides."""
+        """Remove the wall between a cell and its neighbour.
+
+        Args:
+            x: Horizontal coordinate of the current cell.
+            y: Vertical coordinate of the current cell.
+            move: Direction and wall information for the movement.
+        """
         _, bit, dx, dy, opp = move
         self.cells[y][x] &= ~bit
         self.cells[y + dy][x + dx] &= ~opp
 
     def _close(self, x: int, y: int, move: Move) -> None:
+        """Restore the wall between a cell and its neighbour.
+
+        Args:
+            x: Horizontal coordinate of the current cell.
+            y: Vertical coordinate of the current cell.
+            move: Direction and wall information for the movement.
+        """
         _, bit, dx, dy, opp = move
         self.cells[y][x] |= bit
         self.cells[y + dy][x + dx] |= opp
 
     # ---------- the '42' ----------
     def _place_pattern(self) -> None:
+        """Place the '42' pattern in the centre of the maze.
+
+        The pattern is skipped if the maze is too small or if the
+        entry or exit overlaps with a pattern cell.
+        """
         self.pattern_cells = set()
         self.pattern_error = None
         if self.width < 9 or self.height < 7:
@@ -144,7 +198,11 @@ class MazeGenerator:
 
     # ---------- perfect maze ----------
     def _carve_tree(self) -> None:
-        """Recursive backtracker with an explicit stack."""
+        """Generate a perfect maze using iterative backtracking.
+
+        The algorithm uses a stack to visit unvisited neighbouring
+        cells and remove walls between connected cells.
+        """
         visited: set[Point] = set(self.pattern_cells)
         visited.add(self.entry)
         stack: list[Point] = [self.entry]
@@ -164,6 +222,16 @@ class MazeGenerator:
 
     # ---------- non-perfect maze ----------
     def _open_block(self, bx: int, by: int) -> bool:
+        """Check whether a 3x3 block has no internal walls.
+
+        Args:
+            bx: Horizontal coordinate of the block's top-left cell.
+            by: Vertical coordinate of the block's top-left cell.
+
+        Returns:
+            True if all cells in the block are connected without
+            internal walls, otherwise False.
+        """
         for dy in range(3):
             for dx in range(3):
                 c = self.cells[by + dy][bx + dx]
@@ -174,6 +242,15 @@ class MazeGenerator:
         return True
 
     def _open_area_near(self, x: int, y: int) -> bool:
+        """Check for an open 3x3 area near a given cell.
+
+        Args:
+            x: Horizontal coordinate of the cell.
+            y: Vertical coordinate of the cell.
+
+        Returns:
+            True if an open 3x3 area is found nearby, otherwise False.
+        """
         for by in range(max(0, y - 2), min(y, self.height - 3) + 1):
             for bx in range(max(0, x - 2), min(x, self.width - 3) + 1):
                 if self._open_block(bx, by):
@@ -181,7 +258,20 @@ class MazeGenerator:
         return False
 
     def _try_open(self, x: int, y: int, move: Move) -> bool:
-        """Open one wall unless it breaks a rule. True if opened."""
+        """Try to remove a wall while preserving maze constraints.
+
+        The method rejects moves outside the maze, moves involving
+        pattern cells, and walls that are already open. It also
+        rejects moves that create an open 3x3 area.
+
+        Args:
+            x: Horizontal coordinate of the current cell.
+            y: Vertical coordinate of the current cell.
+            move: Direction and wall information for the movement.
+
+        Returns:
+            True if the wall was successfully opened, otherwise False.
+        """
         nx, ny = x + move[2], y + move[3]
         if not self._inside(nx, ny):
             return False
@@ -196,7 +286,10 @@ class MazeGenerator:
         return True
 
     def _braid_dead_ends(self) -> None:
-        """Give every dead end a second exit (when allowed)."""
+        """Reduce dead ends by opening additional passages.
+
+        Each dead end is given an attempt to open a second passage.
+        """
         ends = self.dead_ends()
         self._rng.shuffle(ends)
         for x, y in ends:
@@ -209,7 +302,11 @@ class MazeGenerator:
                     break
 
     def _add_loops(self) -> None:
-        """Make sure there are at least two independent loops."""
+        """Add passages until the maze has at least two independent loops.
+
+        The method stops when two loops have been created or when
+        no valid walls remain to open.
+        """
         loops = self.loop_count()
         if loops >= 2:
             return
@@ -224,6 +321,15 @@ class MazeGenerator:
 
     # ---------- BFS ----------
     def _solve(self) -> str:
+        """Find the shortest path from the entry to the exit using BFS.
+
+        Returns:
+            A string containing the movement directions, such as
+            'EESS'.
+
+        Raises:
+            ValueError: If no path exists between the entry and exit.
+        """
         queue: deque[Point] = deque([self.entry])
         came_from: dict[Point, tuple[Point, str]] = {}
         seen: set[Point] = {self.entry}
