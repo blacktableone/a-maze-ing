@@ -16,11 +16,21 @@ FIXED_COLORS: dict[str, str] = {
 
 
 def build_canvas(maze: MazeGenerator, show_path: bool) -> list[list[str]]:
-    """Turn the maze into a grid of kinds.
+    """Convert the maze into a character-based display grid.
 
-    '#' wall, ' ' floor, 'P' pattern, 'A' path, 'S' entry, 'E' exit.
-    Cell (x, y) sits at canvas[2y+1][2x+1]; walls sit between cells.
+    Each maze cell occupies a position in the canvas. Walls and
+    passages are represented by characters. The shortest path,
+    entry, exit and '42' pattern are also displayed when applicable.
+
+    Args:
+        maze: MazeGenerator instance containing the maze data.
+        show_path: Whether to display the shortest solution path.
+
+    Returns:
+        A two-dimensional list of characters representing the maze.
+        Characters include '#', ' ', 'P', 'A', 'S' and 'E'.
     """
+
     h, w = maze.height, maze.width
     canvas = [["#"] * (2 * w + 1) for _ in range(2 * h + 1)]
     for y in range(h):
@@ -49,7 +59,18 @@ def build_canvas(maze: MazeGenerator, show_path: bool) -> list[list[str]]:
 
 def render(maze: MazeGenerator, show_path: bool,
            wall_idx: int, pattern_idx: int) -> None:
-    """Print the maze using coloured blocks (2 characters per square)."""
+    """Display the maze in the terminal using ANSI background colours.
+
+    Different colours represent walls, the '42' pattern, the
+    shortest path, the entry and the exit.
+
+    Args:
+        maze: MazeGenerator instance containing the maze data.
+        show_path: Whether to display the shortest solution path.
+        wall_idx: Index selecting a colour from WALL_COLORS.
+        pattern_idx: Index selecting a colour from PATTERN_COLORS.
+    """
+
     colors = {"#": WALL_COLORS[wall_idx],
               "P": PATTERN_COLORS[pattern_idx], **FIXED_COLORS}
     lines: list[str] = []
@@ -66,7 +87,17 @@ def render(maze: MazeGenerator, show_path: bool,
 
 def run_menu(maze: MazeGenerator,
              on_new_maze: Callable[[MazeGenerator], None]) -> None:
-    """Show the maze and loop on the user's choices until Quit."""
+    """Run the interactive maze menu until the user quits.
+
+    Displays the maze and allows the user to regenerate it,
+    toggle the solution path, change colours or quit.
+
+    Args:
+        maze: MazeGenerator instance to display and modify.
+        on_new_maze: Callback function called after generating
+            a new maze. Receives the updated MazeGenerator instance.
+    """
+
     show_path = True
     wall_idx = 0
     pattern_idx = 0
