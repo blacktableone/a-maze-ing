@@ -38,7 +38,6 @@ make run            # python3 a_maze_ing.py config.txt
 | `make clean` | Removes `__pycache__`, `.mypy_cache`, `build`, `dist`... |
 | `make lint` | `flake8 .` and `mypy` with the required flags |
 | `make lint-strict` | `flake8 .` and `mypy . --strict` (optional) |
-| `make test` | Runs the unit tests (`pytest`) |
 
 You can also run it directly: `python3 a_maze_ing.py config.txt`.
 
@@ -60,8 +59,8 @@ One `KEY=VALUE` per line. Lines starting with `#` and empty lines are ignored.
 
 | Key | Mandatory | Description | Example |
 |---|---|---|---|
-| `WIDTH` | yes | Number of columns, integer >= 2 | `WIDTH=20` |
-| `HEIGHT` | yes | Number of rows, integer >= 2 | `HEIGHT=15` |
+| `WIDTH` | yes | Number of columns, integer between 2 and 42 | `WIDTH=20` |
+| `HEIGHT` | yes | Number of rows, integer between 2 and 42 | `HEIGHT=15` |
 | `ENTRY` | yes | Entry cell `x,y`, inside the maze | `ENTRY=0,0` |
 | `EXIT` | yes | Exit cell `x,y`, inside the maze, different from entry | `EXIT=19,14` |
 | `OUTPUT_FILE` | yes | Output file name | `OUTPUT_FILE=maze.txt` |
@@ -114,7 +113,7 @@ hit Python's recursion limit. The result is a spanning tree, which guarantees
 full connectivity and no loops, i.e. exactly one path between any two cells.
 We chose it because it is simple to explain and to test, it makes long
 winding corridors, and it is easy to make reproducible with a seeded random
-generator. [EDIT: add your own reasons.]
+generator.
 
 **Non-perfect maze: braiding.** We first build a perfect maze, then open an
 extra wall in every dead end (a cell with a single opening). Before each wall
@@ -200,7 +199,6 @@ License: see `LICENSE.md` (MIT, which allows reuse and distribution).
 a_maze_ing.py          main program: config parsing, output file, entry point
 display.py             terminal rendering and interactive menu
 mazegen/               reusable package (MazeGenerator)
-test/                 unit test (pytest)
 config.txt             default configuration
 Makefile, pyproject.toml, LICENSE.md, README.md, .gitignore
 mazegen-1.0.0-py3-none-any.whl
@@ -208,21 +206,41 @@ mazegen-1.0.0-py3-none-any.whl
 
 ## Testing
 
-`make test` runs the pytest suite: too-small mazes, invalid entry/exit,
-invalid configs (the program must never crash), shared-wall consistency,
-closed borders, connectivity, absence of 3x3 open areas, seed
-reproducibility, loop count and output file format. `make lint` checks
+`make lint` checks
 flake8 and mypy. We also checked our output files with the provided
 `maze_analyzer.py`.
 
 ## Team and project management
 
 
-- **Roles:** nisu: ...need add / plillian: ...need add
-- **Planned schedule and how it evolved:** need add
+**Roles:** 
+- **nisu: Configuration, pathfinding and output**
+- Read and validate config.txt
+- BFS shortest-path algorithm
+- Hexadecimal encoding and output file
+- Terminal rendering and path display
+- Error handling and command-line execution
+
+- **plillian: Maze generation and data structure**
+- MazeGenerator class
+- Grid、cell and wall representation
+- Recursive Backtracking algorithm
+- PERFECT=True/False's logic
+- 42 pattern and seed reproducibility
+
+- **together:**
+- Agree on the data structure and function interfaces
+- Integrate and test the complete program
+- Run maze_analyzer.py, flake8 and mypy
+- Prepare README, package documentation and license
+- Explain and review each other's code
+
 - **What worked well / what could be improved:**
-- **Tools used:** Git, Python, venv, flake8, mypy, pytest, build, pdb, Makefile,
-  `maze_analyzer.py`, ...
+- need agree on the interface on Day 1 and make sure to write agreements in a shared interfaces.md.It is much easier to agree on the interfaces first than to fix incompatible code later.
+
+- **Tools used:** Git, Python, venv, flake8, mypy,  build, pdb, Makefile,
+  `maze_analyzer.py`
+
 
 ## Resources
 
@@ -233,18 +251,14 @@ flake8 and mypy. We also checked our output files with the provided
 - [Maze Solving - Computerphile](https://www.youtube.com/watch?v=rop0W4QDOUI)
 - [Breadth First Search Algorithm | Shortest Path | Graph Theory](https://www.youtube.com/watch?v=oDqjPvD54Ss)
 - [Python argparse Tutorial](https://docs.python.org/3/howto/argparse.html?utm_source=chatgpt.com)：learn how to read command-line arguments。
-- [Python pathlib](https://docs.python.org/3/library/pathlib.html?utm_source=chatgpt.com)：
+- [Python pathlib](https://docs.python.org/3/library/pathlib.html?utm_source=chatgpt.com)
 - [Python Errors and Exceptions](https://docs.python.org/3/tutorial/errors.html?utm_source=chatgpt.com)：review `try`、`except`
-
-# creat
 
 
 ### How AI was used
 
 - Explaining concepts (recursive backtracking, BFS, bit masks, packaging) and
   suggesting a study plan.
-- Drafting first versions of the config parser, `MazeGenerator`, the display
-  menu and the tests; we typed, tested, and corrected them ourselves, and each
-  team member can explain every part.
+- Drafting testing plan for the project
 - Generating the README template and the Makefile skeleton.
-
+- Help adding Python docstrings
